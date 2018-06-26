@@ -10,6 +10,18 @@
 .#   License, v. 2.0. If a copy of the MPL was not distributed with this
 .#   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 .output "resume.tex"
+.#   Generate LaTeX form of resume
+.#
+.#   This is a code generator built using the iMatix GSL code generation
+.#   language. See https://github.com/zeromq/gsl for details.
+.#
+.#   Copyright (c) the Contributors as noted in the AUTHORS file.
+.#   This file is part of zproject.
+.#
+.#   This Source Code Form is subject to the terms of the Mozilla Public
+.#   License, v. 2.0. If a copy of the MPL was not distributed with this
+.#   file, You can obtain one at http://mozilla.org/MPL/2.0/.
+.output "resume.tex"
 \\documentclass[letterpaper]{article}
 \\usepackage[utf8]{inputenc}
 %%% Cestina
@@ -90,8 +102,6 @@
 
 \\vspace{0.15in}
 
-%% Personal information
-%\\section*{Personal details}
 \\section*{About me}
 
 \\begin{itemize}
