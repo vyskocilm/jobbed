@@ -1,0 +1,160 @@
+.#   Generate HTML form of resume
+.#
+.#   This is a code generator built using the iMatix GSL code generation
+.#   language. See https://github.com/zeromq/gsl for details.
+.#
+.#   Copyright (c) the Contributors as noted in the AUTHORS file.
+.#   This file is part of zproject.
+.#
+.#   This Source Code Form is subject to the terms of the Mozilla Public
+.#   License, v. 2.0. If a copy of the MPL was not distributed with this
+.#   file, You can obtain one at http://mozilla.org/MPL/2.0/.
+.output "resume.html"
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Resume: $(resume.name)</title>
+    </head>
+
+    <body>
+        <h1>$(resume.name)</h1>
+        <table>
+.scope resume->headline
+            <tr>
+                <td><b>Date of birth</b></td>
+                <td>$(headline->birth.date)</td>
+            </tr>
+            <tr>
+                <td><b>Nationality</b></td>
+                <td>$(headline->nationality.text:)</td>
+            </tr>
+.   if defined (headline->phone)
+            <tr>
+                <td><b>Phone</b></td>
+                <td>$(headline->phone.number:)</td>
+            </tr>
+.   endif
+.   if defined (headline->email)
+            <tr>
+                <td><b>Email</b></td>
+                <td><a href="mailto:$(headline->email.mailto:)">$(headline->email.mailto:)</a></td>
+            </tr>
+.   endif
+.   if defined (headline->web)
+            <tr>
+                <td><b>Web</b></td>
+                <td><a href="mailto:$(headline->web.href:)">$(headline->web.href:)</a></td>
+            </tr>
+.   endif
+.       for item
+            <tr>
+                <td><b>$(item.title:)</b></td>
+.           if defined (item.href) & ! defined (item.text)
+                <td><a href="$(item.href)">$(item.href)</a></td>
+.           elsif defined (item.href) & defined (item.text)
+                <td><a href="$(item.href)">$(item.text:)</a></td>
+.           else
+                <td>$(item.text:)</td>
+.           endif
+            </tr>
+.       endfor
+.endscope
+        </table>
+
+        <h2>About me</h2>
+.scope resume->about
+.   for p
+        <p>
+    $(string.trim (p.):block                                         )
+        <\p>
+.   endfor
+.endscope
+
+         <h2>Education</h2>
+.scope resume->education
+.   for school
+            <h3>$(name:)</h3>
+                Specialization <em>$(specialization:)</em>, $(degree:) degree, $(finishedin?"(present)")
+.   endfor
+.endscope
+
+        <h2>Work experience</h2>
+.scope resume->jobs
+.   for position
+            <h3>$(position.title:)</h3>
+            <a href="$(position.href)">$(position.organization:)</a>, $(position.location:), $(position.startedin) - $(position.finishedin)
+            <p>
+    $(string.trim (position.):block                                         )
+            </p>
+.   endfor
+.endscope
+
+
+        <h2>Side projects</h2>
+.scope resume->projects
+.   for position
+            <h3>$(position.title:)</h3>
+.       if defined (position.organization)
+            <a href="$(position.href)">$(position.organization:)</a>, $(position.location:), $(position.startedin) - $(position.finishedin)
+.       endif
+            <p>
+    $(string.trim (position.):block                                         )
+            </p>
+.   endfor
+.endscope
+
+        <h2>Languages</h2>
+        <table>
+.scope resume->languages
+.   for lang
+            <tr>
+                <td><b>$(lang.name:)</b></td>
+                <td>$(lang.)</td>
+            </tr>
+.   endfor
+.endscope
+        </table>
+
+        <h2>Technical Experience</h2>
+        <table>
+.scope resume->skills
+.   for skill
+            <tr>
+                <td><strong>$(skill.name:)</strong></td>
+                <td>$(skill.:)</td>
+            </tr>
+.   endfor
+.endscope
+         </table>
+
+        <h2>Personality traits, other skills</h2>
+.scope resume->traits
+.   for trait
+            <p>
+    $(string.trim (trait.):block                                         )
+            </p>
+.   endfor
+.endscope
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
