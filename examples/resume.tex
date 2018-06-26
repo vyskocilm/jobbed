@@ -1,0 +1,133 @@
+\documentclass[letterpaper]{article}
+\usepackage[utf8]{inputenc}
+%%% Cestina
+\usepackage[czech]{babel}    % Babel
+%%% Fonty
+\usepackage[T1]{fontenc}
+%\usepackage[IL2]{fontenc}
+
+\usepackage{hyperref}
+\usepackage{geometry}
+
+
+\def\name{Žluťoučký kůň}
+
+\hypersetup{
+  colorlinks = true,
+  urlcolor = blue,
+  pdfauthor = {\name},
+  pdfkeywords = {curriculum vitae, cv},
+  pdftitle = {\name: Curriculum Vitae},
+  pdfsubject = {Curriculum Vitae},
+  pdfpagemode = UseNone
+}
+
+\geometry{
+  body={6.5in, 8.5in},
+  left=1.0in,
+%  top=1.25in
+  top=0.75in,
+  bottom=0.5in
+}
+
+% ???
+\pagestyle{myheadings}
+\markright{\name}
+\thispagestyle{empty}
+
+\setlength\parindent{0em}
+
+\renewenvironment{itemize}{
+  \begin{list}{}{
+    \setlength{\leftmargin}{1.5em}
+  }
+}{
+  \end{list}
+}
+
+\begin{document}
+
+\moveleft.5\hoffset\centerline{\huge\bf Žluťoučký kůň}
+\moveleft\hoffset\vbox{\rule[1pt]{6.5in}{0.03cm}}\smallskip
+\moveleft.5\hoffset\centerline{
+  \begin{tabular}{ll}
+      Date of birth: & 1.1.1970 \\
+      Nationality: & Czech republic \\
+      Phone.: & 555-123-321 \\
+      Email: & \href{mailto:zlutoucky.kun@email.com}{\tt zlutoucky.kun@email.com} \\
+      Web: & \href{https://zlutouckykun.github.io}{\tt https://zlutouckykun.github.io} \\
+      Github: & \href{https://github.com/zlutouckykun}{\tt https://github.com/zlutouckykun} \\
+      LinkedIn: & \href{https://www.linkedin.com/in/zlutouckykun}{\tt https://www.linkedin.com/in/zlutouckykun} \\
+      Insights: & \href{http://www.robpurfieldinsights.com/eight-types/the-observer-cool-blue/}{\tt Observer} \\
+  \end{tabular}
+}
+
+\vspace{0.15in}
+
+\section*{About me}
+
+\begin{itemize}
+\item             I am the Unicode support testing phrase with more than 20 years of experience in global international technology companies as well as small startups and flexible teams. I am well recognized by the Czech developers as I contain more diacritic characters than any comparable phrase. My strenghts are user friendliness, beeing cute (who would not like yelowish horse?) and beeing able to spot mistakes in Unicode character handling.
+
+\item             I am not looking for the job as I am widelly deployed in many source codes all around the world.
+
+\end{itemize}
+
+%% EDUCATION
+\section*{Education}
+
+\begin{itemize}
+  \item Czech Academy of Sciences, Czech Language departenment \\
+  specialization \emph{National character support in computer equipment}, \\
+  Masters degree, 1991
+\end{itemize}
+
+\section*{Work experience}
+\begin{itemize}
+
+  \item{\begin{tabbing}
+   \hspace{4.5in}\= \kill % set up two tab positions
+    {\bf Unicode support tester} \> \\
+     \href{https://dbvisit.com}{\tt All software developers, LTD}, Czech republic \>1.1.1991 - (present)\\
+   \end{tabbing}\vspace{-12pt}
+
+            Short Unicode testing phrase. Can be used to test the support of extended ASCII or non Unicode encodings like Windows CP 1250. Still useful in 21st century, because some systems breaks on non-ASCII input or broke non-ASCII outputs a lot. Compatible with C, C++, Java, Python, Perl, Ruby, .NET, Lisp, Haskell, Cloud, CSS, Html, Javascript, SQL, PHP, Cobol, Fortran. Used by many top notch companies in their tests.
+
+}
+\end{itemize}
+
+\section*{Side projects}
+\begin{itemize}
+  \item{\begin{tabbing}
+   \hspace{4.5in}\= \kill % set up two tab positions
+    {\bf Ice cream maker} \> \\
+   \end{tabbing}\vspace{-12pt}
+
+            Making the best ice cream! Ever!
+
+}
+\end{itemize}
+
+\section*{Languages}
+\begin{itemize}
+ \item {\bf English} - nothing, completelly incomprehensible by English speakers.
+ \item {\bf Czech} - Native sentence, use most of diacritics
+\end{itemize}
+
+\section*{Technical Experience}
+\begin{itemize}
+ \item {\bf Programming languages:} Java, C, C++, Python, C\#
+ \item {\bf Project management:} Waterfall, SCUM, Kanban, Gant charts
+ \item {\bf Computer programs:} MS Office, Adobe InDesign, Oracle Database
+ \item {\bf Marketing:} Communication, negotiation, stress management
+\end{itemize}
+
+\section*{Personality traits, other skills}
+\begin{itemize}
+ \item Analytical thinking
+ \item Usefull phrase
+ \item Team player
+
+\end{itemize}
+
+\end{document}
