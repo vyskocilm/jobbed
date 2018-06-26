@@ -1,0 +1,10 @@
+# build artifacts for resume
+resume.*
+# MVY's build script
+b
+#texlive artifact
+texput.log
+# vim temp files
+.*swp
+.*swo
+

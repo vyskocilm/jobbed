@@ -1,0 +1,88 @@
+<resume
+    script = "jobbed_latex.gsl"
+    name = "Žluťoučký kůň"
+    >
+
+    <headline>
+        <birth date="1.1.1970" />
+        <nationality text="Czech republic" />
+        <phone number="555-123-321"/>
+        <email mailto="zlutoucky.kun@email.com" />
+        <web href="https://zlutouckykun.github.io" />
+        <item
+            title="Github"
+            href="https://github.com/zlutouckykun"
+            />
+        <item
+            title="LinkedIn"
+            href="https://www.linkedin.com/in/zlutouckykun"
+            />
+        <item
+            title="Insights"
+            text="Observer"
+            href="http://www.robpurfieldinsights.com/eight-types/the-observer-cool-blue/"
+            />
+    </headline>
+
+    <about>
+        <p>
+            I am the Unicode support testing phrase with more than 20 years of experience in global international technology companies as well as small startups and flexible teams. I am well recognized by the Czech developers as I contain more diacritic characters than any comparable phrase. My strenghts are user friendliness, beeing cute (who would not like yelowish horse?) and beeing able to spot mistakes in Unicode character handling.
+        </p>
+        <p>
+            I am not looking for the job as I am widelly deployed in many source codes all around the world.
+        </p>
+    </about>
+
+    <education>
+        <school
+            name="Czech Academy of Sciences, Czech Language departenment"
+            specialization="National character support in computer equipment"
+            degree="Masters"
+            finishedin="1991"
+            />
+    </education>
+
+    <jobs>
+        <position
+            title="Unicode support tester"
+            organization="All software developers, LTD"
+            href="https://dbvisit.com"
+            location="Czech republic"
+            startedin="1.1.1991"
+            finishedin="(present)"
+            >
+            Short Unicode testing phrase. Can be used to test the support of extended ASCII or non Unicode encodings like Windows CP 1250. Still useful in 21st century, because some systems breaks on non-ASCII input or broke non-ASCII outputs a lot. Compatible with C, C++, Java, Python, Perl, Ruby, .NET, Lisp, Haskell, Cloud, CSS, Html, Javascript, SQL, PHP, Cobol, Fortran. Used by many top notch companies in their tests.
+        </position>
+    </jobs>
+
+    <!-- side projects -->
+    <projects>
+        <position
+            title="Ice cream maker"
+            location="Denmark"
+            startedin="9.9.1999"
+            finishedin="(present)"
+            >
+            Making the best ice cream! Ever!
+        </position>
+    </projects>
+
+    <languages>
+        <lang name="English">nothing, completelly incomprehensible by English speakers.</lang>
+        <lang name="Czech">Native sentence, use most of diacritics</lang>
+    </languages>
+
+    <skills>
+        <skill name="Programming languages">Java, C, C++, Python, C\#</skill>
+        <skill name="Project management">Waterfall, SCUM, Kanban, Gant charts</skill>
+        <skill name="Computer programs">MS Office, Adobe InDesign, Oracle Database</skill>
+        <skill name="Marketing">Communication, negotiation, stress management</skill>
+    </skills>
+
+    <traits>
+        <trait>Analytical thinking</trait>
+        <trait>Usefull phrase</trait>
+        <trait>Team player</trait>
+    </traits>
+
+</resume>

@@ -1,0 +1,180 @@
+.#   Generate LaTeX form of resume
+.#
+.#   This is a code generator built using the iMatix GSL code generation
+.#   language. See https://github.com/zeromq/gsl for details.
+.#
+.#   Copyright (c) the Contributors as noted in the AUTHORS file.
+.#   This file is part of zproject.
+.#
+.#   This Source Code Form is subject to the terms of the Mozilla Public
+.#   License, v. 2.0. If a copy of the MPL was not distributed with this
+.#   file, You can obtain one at http://mozilla.org/MPL/2.0/.
+.output "resume.tex"
+\\documentclass[letterpaper]{article}
+\\usepackage[utf8]{inputenc}
+%%% Cestina
+\\usepackage[czech]{babel}   % Babel
+%%% Fonty
+\\usepackage[T1]{fontenc}
+%\\usepackage[IL2]{fontenc}
+
+\\usepackage{hyperref}
+\\usepackage{geometry}
+
+
+\\def\\name{$(name)}
+
+\\hypersetup{
+  colorlinks = true,
+  urlcolor = blue,
+  pdfauthor = {\\name},
+  pdfkeywords = {curriculum vitae, cv},
+  pdftitle = {\\name: Curriculum Vitae},
+  pdfsubject = {Curriculum Vitae},
+  pdfpagemode = UseNone
+}
+
+\\geometry{
+  body={6.5in, 8.5in},
+  left=1.0in,
+%  top=1.25in
+  top=0.75in,
+  bottom=0.5in
+}
+
+% ???
+\\pagestyle{myheadings}
+\\markright{\\name}
+\\thispagestyle{empty}
+
+\\setlength\\parindent{0em}
+
+\\renewenvironment{itemize}{
+  \\begin{list}{}{
+    \\setlength{\\leftmargin}{1.5em}
+  }
+}{
+  \\end{list}
+}
+
+\\begin{document}
+
+\\moveleft.5\\hoffset\\centerline{\\huge\\bf $(name:)}
+\\moveleft\\hoffset\\vbox{\\rule[1pt]{6.5in}{0.03cm}}\\smallskip
+\\moveleft.5\\hoffset\\centerline{
+  \\begin{tabular}{ll}
+.scope resume->headline
+      Date of birth: & $(headline->birth.date) \\\\
+      Nationality: & $(headline->nationality.text:) \\\\
+.   if defined (headline->phone)
+      Phone.: & $(headline->phone.number) \\\\
+.   endif
+.   if defined (headline->email)
+      Email: & \\href{mailto:$(headline->email.mailto)}{\\tt $(headline->email.mailto)} \\\\
+.   endif
+.   if defined (headline->web)
+      Web: & \\href{$(headline->web.href)}{\\tt $(headline->web.href)} \\\\
+.   endif
+.       for item
+.           if defined (item.href) & ! defined (item.text)
+      $(item.title:): & \\href{$(item.href)}{\\tt $(item.href)} \\\\
+.           elsif defined (item.href) & defined (item.text)
+      $(item.title:): & \\href{$(item.href)}{\\tt $(item.text:)} \\\\
+.           else
+      $(item.title:): & $(item.text) \\\\
+.           endif
+.       endfor
+.endscope
+  \\end{tabular}
+}
+
+\\vspace{0.15in}
+
+%% Personal information
+%\\section*{Personal details}
+\\section*{About me}
+
+\\begin{itemize}
+.scope resume->about
+.   for p
+\\item $(string.trim (p.):block                                         )
+
+.   endfor
+\\end{itemize}
+.endscope
+
+%% EDUCATION
+\\section*{Education}
+.scope resume->education
+.   for school
+
+\\begin{itemize}
+  \\item $(name:) \\\\
+  specialization \\emph{$(specialization:)}, \\\\
+  $(degree:) degree, $(finishedin?"(present)")
+.   endfor
+.endscope
+\\end{itemize}
+
+\\section*{Work experience}
+\\begin{itemize}
+
+.scope resume->jobs
+.   for position
+  \\item{\\begin{tabbing}
+   \\hspace{4.5in}\\= \\kill % set up two tab positions
+    {\\bf $(position.title:)} \\> \\\\        
+     \\href{$(position.href)}{\\tt $(position.organization:)}, $(position.location:) \\>$(position.startedin) - $(position.finishedin)\\\\
+   \\end{tabbing}\\vspace{-12pt}
+        $(position.)
+}
+.   endfor
+.endscope
+\\end{itemize}
+
+\\section*{Side projects}
+\\begin{itemize}
+.scope resume->projects
+.   for position
+  \\item{\\begin{tabbing}
+   \\hspace{4.5in}\\= \\kill % set up two tab positions
+    {\\bf $(position.title:)} \\> \\\\        
+.       if defined (position.organization)
+     \\href{$(position.href)}{\\tt $(position.organization:)}, $(position.location:) \\>$(position.startedin) - $(position.finishedin)\\\\
+.       endif
+   \\end{tabbing}\\vspace{-12pt}
+        $(position.)
+}
+.   endfor
+.endscope
+\\end{itemize}
+
+\\section*{Languages}
+\\begin{itemize}
+.scope resume->languages
+.   for lang
+ \\item {\\bf $(lang.name:)} - $(lang.:)
+.   endfor
+.endscope
+\\end{itemize}
+
+\\section*{Technical Experience}
+\\begin{itemize} 
+.scope resume->skills
+.   for skill
+ \\item {\\bf $(skill.name:):} $(skill.:)
+.   endfor
+.endscope
+\\end{itemize}
+
+\\section*{Personality traits, other skills} 
+\\begin{itemize}
+.scope resume->traits
+.   for trait
+ \\item $(trait.:)
+.   endfor
+.endscope
+
+\\end{itemize}
+
+\\end{document}
