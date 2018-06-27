@@ -19,6 +19,17 @@ You will find the result PDF as `resume.pdf`.
 
 And of course, feel free to use whatever Texlive installation as you want to :-)
 
+## REST API
+
+Note: this is WIP, no API stability is guaranteed atm
+
+```
+cd rest/
+pipenv install
+pipenv shell
+python3 app.py
+```
+
 ## TL;DR
 
 It is a magic. You write one xml file, call the tool `gsl`, *et voilà !* We got
