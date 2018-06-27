@@ -11,7 +11,7 @@ MUST look like written exactly for given target.
 Install `zeromq/gsl`, put `jobbed_latex.gsl` to your `PATH` and run
 
 ```
-gsl resume.xml
+gsl -script:jobbed_latex resume.xml
 docker run -w /data -v $(pwd):/data -it --rm hiono/texlive pdflatex resume.tex
 ```
 
