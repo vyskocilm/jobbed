@@ -29,10 +29,21 @@ def not_found(error):
         jsonify({"error": "Not found"}),
         http.HTTPStatus.NOT_FOUND)
 
-@app.route ("/api/v0.1/resume", methods=["POST"])
-def post_resume ():
+@app.route ("/api/v0.1/scripts", methods=["GET"])
+def get_scripts ():
+    """Return the list of resume scripts available on the system"""
     return make_response (
-        jsonify ({"error" : "Not yet implemented"}),
+        jsonify ({"scripts": [
+            {"script" : "jobbed_html", "Content-type" : "text/html; charset=utf-8"},
+            {"script" : "jobbed_latex", "Content-type" : "text/plain; charset=utf-8"}]}),
+        http.HTTPStatus.NOT_IMPLEMENTED)
+
+
+@app.route ("/api/v0.1/scripts/<script>", methods=["POST"])
+def post_resume (script):
+    # 1. get the 
+    return make_response (
+            jsonify ({"error" : "Not yet implemented: " + script}),
         http.HTTPStatus.NOT_IMPLEMENTED)
 
 if __name__ == '__main__':
