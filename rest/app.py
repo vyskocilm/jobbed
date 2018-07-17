@@ -137,7 +137,6 @@ def post_scripts (name):
     assert resume_xml
 
     #TODO: make async - pust it to worker queue
-    import pdb; pdb.set_trace ()
     js, code = do_jobbed (resume_xml, SCRIPTS [name]["code"])
     return make_jresponse (
         js,
