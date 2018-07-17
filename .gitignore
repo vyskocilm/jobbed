@@ -7,4 +7,4 @@ texput.log
 # vim temp files
 .*swp
 .*swo
-
+__pycache__

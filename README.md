@@ -73,3 +73,51 @@ the TeX (or LaTeX) file you want to.
 1. Do it **manually** - no way, we're developers
 2. Write & convert - it's not going to look the same and of course it's easy to
    find a format we can't convert into
+
+
+## REST API
+
+Thin REST API layer writter in Flask.
+
+### List scripts
+
+GET /api/v1/scripts
+output:
+[
+{"name" : "foobar", "descripton" : "description"},
+{"name" : "hamspam", "description" : "description"}
+]
+
+### Post new job
+POST /api/v1/scripts/<name>
+POST data: resume.xml
+output:
+[
+{"api" : "/api/v1/job/1", "status" : "in-progress"},
+{"api" : "/api/v1/job/2", "status" : "done"},
+]
+
+### GET job details
+GET /api/v1/job/<id>
+{"api": "/api/v1/job/1",
+ "status" : "done",
+ "files" : [
+    {"api" : "/static/uuid", "content-type" : "text/plain", "size" : 1234},
+ ]
+}
+
+
+## Use and test
+
+```
+FLASK_DEBUG=true FLASK_APP=app.py flask run
+```
+
+```
+curl -X POST -H "Content-Type: application/xml" --data @examples/resume.xml http://localhost:5000/api/v1/scripts/jobbed_html
+[
+  "/static/147042b1-da0f-468d-b923-3efef157e999/resume.html"
+]
+curl http://localhost:5000/static/147042b1-da0f-468d-b923-3efef157e999/resume.htm
+...
+```
