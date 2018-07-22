@@ -13,6 +13,8 @@ import os
 from functools import partial as FP
 import uuid
 import subprocess
+import shlex
+import shutil
 
 app = Flask(__name__)
 CWD = os.getcwd ()
@@ -22,14 +24,19 @@ def make_jresponse (obj, return_code=http.HTTPStatus.OK):
 
 def call_gsl (cwd, script, output_name):
     subprocess.check_call (["gsl", f"-script:{cwd}/../{script}.gsl", "resume.xml"])
-    #TODO: assert is exists and if is valid
+    assert os.path.exists (output_name)
     return output_name
 
-def call_pdflatex ():
-    raise NotImplementedError
+def call_pdflatex (output_name):
+    PWD=os.getcwd ()
+    cmd = f"docker run -w /data -v {PWD}:/data -it --rm hiono/texlive pdflatex resume.tex"
+    subprocess.check_call (
+        shlex.split (cmd))
+    assert os.path.exists (output_name)
+    return output_name
 
 # main business logic code
-def do_jobbed (xml, code):
+def do_jobbed (xml, resume_str, code):
     global CWD
     #TODO: add an extra validation of loaded XML
     #TODO: this MUST be isolated from main server
@@ -39,9 +46,17 @@ def do_jobbed (xml, code):
 
     cwd = CWD
     os.chdir (workdir.name)
-
-    with open ("resume.xml", "wb") as resume_file:
-        resume_file.write (ET.tostring (xml))
+    
+    # FIXME: ElementTree's API is AWFULL!! Can't believe this is the best
+    # API for Python. How on earth can .parse return ElementTree, where
+    # .formstring (which accepts bytes**!!) returns Element???
+    #
+    # The problem is that you CAN'T WRITE utf-8 XML you read fromstring
+    # such convoluted API is f*cking hard to use!!!!!
+    #
+    # Solved it by passing decoded unicode
+    with open ("resume.xml", "wt") as resume_file:
+        resume_file.write (resume_str)
 
     _uuid = str (uuid.uuid4 ())
     os.makedirs (
@@ -57,7 +72,7 @@ def do_jobbed (xml, code):
     #FIXME: error handling
     for f in code:
         out = f ()
-        os.rename (out,
+        shutil.copy2 (out,
             os.path.join (
                 cwd,
                 "static",
@@ -105,7 +120,8 @@ SCRIPTS = {
     "jobbed_latex" : {
         "path" : "jobbed_latex.gsl",
         "description" : "Create LaTeX and PDF output",
-        "code" : call_pdflatex
+        "code" : (FP (call_gsl, CWD, "jobbed_latex", "resume.tex"),
+                  FP (call_pdflatex, "resume.pdf"))
     },
 }
 
@@ -129,15 +145,16 @@ def post_scripts (name):
 
     resume_bytes = request.get_data ()
     assert resume_bytes
+    resume_str = resume_bytes.decode ('utf-8')
 
     #TODO: put some boundaries in place
     ## What can go wrong?
     # https://pypi.org/project/defusedxml/#id24
-    resume_xml = ET.fromstring (resume_bytes)
+    resume_xml = ET.fromstring (resume_str)
     assert resume_xml
 
     #TODO: make async - pust it to worker queue
-    js, code = do_jobbed (resume_xml, SCRIPTS [name]["code"])
+    js, code = do_jobbed (resume_xml, resume_str, SCRIPTS [name]["code"])
     return make_jresponse (
         js,
         code)
