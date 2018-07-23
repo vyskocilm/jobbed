@@ -7,7 +7,7 @@ from flask import jsonify
 from flask import make_response
 from flask import url_for
 from flask import request
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 import tempfile
 import os
 from functools import partial as FP
@@ -137,6 +137,13 @@ def get_scripts ():
 
 @app.route ("/api/v1/scripts/<name>", methods=["POST"])
 def post_scripts (name):
+
+    cl = request.content_length
+    if cl > 32635:
+        return make_jresponse (
+            {"error": f"requested entity too large: {cl}"},
+             http.HTTPStatus.REQUEST_ENTITY_TOO_LARGE)
+
     global SCRIPTS
     if not name in SCRIPTS:
         make_jresponse ({
