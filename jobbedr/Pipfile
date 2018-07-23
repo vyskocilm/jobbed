@@ -8,6 +8,9 @@ flask = "*"
 defusedxml = "*"
 
 [dev-packages]
+pytest = "*"
+pytest-runner = "*"
+pytest-flask = "*"
 
 [requires]
 python_version = "3.6"

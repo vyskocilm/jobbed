@@ -1,0 +1,1 @@
+from .jobbedr import app

@@ -87,7 +87,7 @@ def do_jobbed (xml, resume_str, code):
     return outputs, http.HTTPStatus.OK
 
 @app.route('/')
-def index():
+def get_slash():
     return """
 <!DOCTYPE html>
 <html>
@@ -154,9 +154,6 @@ def post_scripts (name):
     assert resume_bytes
     resume_str = resume_bytes.decode ('utf-8')
 
-    #TODO: put some boundaries in place
-    ## What can go wrong?
-    # https://pypi.org/project/defusedxml/#id24
     resume_xml = ET.fromstring (resume_str)
     assert resume_xml
 
@@ -165,6 +162,3 @@ def post_scripts (name):
     return make_jresponse (
         js,
         code)
-
-if __name__ == '__main__':
-    app.run(debug=True, port=5050)

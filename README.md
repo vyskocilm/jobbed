@@ -77,7 +77,7 @@ the TeX (or LaTeX) file you want to.
 
 ## REST API
 
-Thin REST API layer writter in Flask.
+Thin REST API layer writter in Flask. This lives in `jobbedr` folder
 
 ### List scripts
 
@@ -107,10 +107,10 @@ GET /api/v1/job/<id>
 }
 
 
-## Use and test
+## Use and manually test
 
 ```
-FLASK_DEBUG=true FLASK_APP=app.py flask run
+FLASK_DEBUG=true FLASK_APP=jobbedr flask run
 ```
 
 ```
@@ -120,4 +120,11 @@ curl -X POST -H "Content-Type: application/xml" --data @examples/resume.xml http
 ]
 curl http://localhost:5000/static/147042b1-da0f-468d-b923-3efef157e999/resume.htm
 ...
+```
+
+## Unit tests
+
+Just type this inside pipenv shell.
+```
+py.test
 ```
