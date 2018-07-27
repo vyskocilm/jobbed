@@ -152,8 +152,10 @@ def post_scripts (name):
 
     resume_bytes = request.get_data ()
     assert resume_bytes
+    #TODO: add try: catch: for bad request
     resume_str = resume_bytes.decode ('utf-8')
 
+    #TODO: add try: catch: for bad request
     resume_xml = ET.fromstring (resume_str)
     assert resume_xml
 
