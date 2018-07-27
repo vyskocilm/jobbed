@@ -128,3 +128,10 @@ Just type this inside pipenv shell.
 ```
 py.test
 ```
+
+# Making do_jobbed async
+
+* basically Celery, Redis Queue (https://python-rq.org/) or Malamute+workers
+
+
+Right now python-rq looks like the winner!

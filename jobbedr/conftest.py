@@ -13,3 +13,11 @@ def app ():
     #foo = os.environ.get ("JOBBEDR_FOO")
     #_app.config.update (dict (FOO=foo))
     return _app
+
+import shutil
+import glob
+
+for d in glob.glob ("jobbedr/static/*"):
+    shutil.rmtree (d)
+for d in glob.glob ("jobbedr/workdir/*"):
+    shutil.rmtree (d)
