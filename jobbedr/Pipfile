@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 flask = "*"
 defusedxml = "*"
+rq = "*"
+"flask-rq2" = "*"
 
 [dev-packages]
 pytest = "*"

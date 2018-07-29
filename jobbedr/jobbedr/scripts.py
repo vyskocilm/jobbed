@@ -1,13 +1,5 @@
-#!flask/bin/python
-
 import http # and now we REQUIRE python3
 
-from flask import Flask
-from flask import jsonify
-from flask import make_response
-from flask import url_for
-from flask import request
-import defusedxml.ElementTree as ET
 import tempfile
 import os
 from functools import partial as FP
@@ -15,36 +7,40 @@ import uuid
 import subprocess
 import shlex
 import shutil
+import defusedxml.ElementTree as ET
 
-app = Flask(__name__)
-CWD = os.getcwd ()
+from flask import Blueprint
+from flask import jsonify
+from flask import make_response
+from flask import url_for
+from flask import request
 
-def make_jresponse (obj, return_code=http.HTTPStatus.OK):
-    return make_response (jsonify (obj), return_code)
+from . import rq
 
-def call_gsl (cwd, script, output_name):
-    subprocess.check_call (["gsl", f"-script:{cwd}/../{script}.gsl", "resume.xml"])
+scripts = Blueprint ("scripts", __name__)
+
+def call_gsl (script, output_name, datadir=None):
+    assert datadir
+    subprocess.check_call (["gsl", f"-script:{datadir}/../{script}.gsl", "resume.xml"])
     assert os.path.exists (output_name)
     return output_name
 
-def call_pdflatex (output_name):
-    PWD=os.getcwd ()
-    cmd = f"docker run -w /data -v {PWD}:/data -it --rm hiono/texlive pdflatex resume.tex"
+def call_pdflatex (output_name, datadir=None):
+    assert datadir
+    cmd = f"docker run -w /data -v {datadir}:/data -it --rm hiono/texlive pdflatex resume.tex"
     subprocess.check_call (
         shlex.split (cmd))
     assert os.path.exists (output_name)
     return output_name
 
 # main business logic code
-def do_jobbed (xml, resume_str, code):
-    global CWD
+def do_jobbed (cwd, xml, resume_str, code):
     #TODO: add an extra validation of loaded XML
     #TODO: this MUST be isolated from main server
     workdir = tempfile.TemporaryDirectory (
         prefix="jobbed",
-        dir=os.path.join (CWD, "workdir"))
+        dir=os.path.join (cwd, "workdir"))
 
-    cwd = CWD
     os.chdir (workdir.name)
     
     # FIXME: ElementTree's API is AWFULL!! Can't believe this is the best
@@ -71,7 +67,7 @@ def do_jobbed (xml, resume_str, code):
     outputs = []
     #FIXME: error handling
     for f in code:
-        out = f ()
+        out = f (datadir=cwd)
         shutil.copy2 (out,
             os.path.join (
                 cwd,
@@ -86,7 +82,12 @@ def do_jobbed (xml, resume_str, code):
 
     return outputs, http.HTTPStatus.OK
 
-@app.route('/')
+@rq.job
+def do_jobbed_rq2 (cwd, xml, resume_str, code):
+    return do_jobbed (cwd, xml, resume_str, code)
+
+# FIXME: move out
+@scripts.route('/')
 def get_slash():
     return """
 <!DOCTYPE html>
@@ -103,7 +104,8 @@ def get_slash():
 </html>
 """
 
-@app.errorhandler(404)
+#FIXME: register for whole app in __init__.py
+@scripts.errorhandler(404)
 def not_found(error):
     return make_response(
         jsonify({"error": "Not found"}),
@@ -115,17 +117,17 @@ SCRIPTS = {
     "jobbed_html" : {
         "path" : "jobbed_html.gsl",
         "description" : "Create plain html5 output",
-        "code" : (FP (call_gsl, CWD, "jobbed_html", "resume.html"), )
+        "code" : (FP (call_gsl, "jobbed_html", "resume.html"), )
     },
     "jobbed_latex" : {
         "path" : "jobbed_latex.gsl",
         "description" : "Create LaTeX and PDF output",
-        "code" : (FP (call_gsl, CWD, "jobbed_latex", "resume.tex"),
+        "code" : (FP (call_gsl, "jobbed_latex", "resume.tex"),
                   FP (call_pdflatex, "resume.pdf"))
     },
 }
 
-@app.route ("/api/v1/scripts", methods=["GET"])
+@scripts.route ("/api/v1/scripts", methods=["GET"])
 def get_scripts ():
     return make_jresponse ([
         {
@@ -135,9 +137,8 @@ def get_scripts ():
         }
         for name, script in SCRIPTS.items ()])
 
-@app.route ("/api/v1/scripts/<name>", methods=["POST"])
+@scripts.route ("/api/v1/scripts/<name>", methods=["POST"])
 def post_scripts (name):
-
     cl = request.content_length
     if cl > 32635:
         return make_jresponse (
@@ -159,8 +160,18 @@ def post_scripts (name):
     resume_xml = ET.fromstring (resume_str)
     assert resume_xml
 
-    #TODO: make async - pust it to worker queue
-    js, code = do_jobbed (resume_xml, resume_str, SCRIPTS [name]["code"])
+    """
+    # sync variant
+    js, code = do_jobbed (CWD, resume_xml, resume_str, SCRIPTS [name]["code"])
     return make_jresponse (
         js,
         code)
+    """
+
+    import pdb; pdb.set_trace ()
+    cwd = scripts.config.get ("CWD")
+    job = do_jobbed_rq2.queue (cwd, resume_str, resume_str, SCRIPTS [name]["code"], queue='default', timeout=60)
+
+if __name__ == "__main__":
+    app = create_app ()
+    app.run ()

@@ -110,7 +110,7 @@ GET /api/v1/job/<id>
 ## Use and manually test
 
 ```
-FLASK_DEBUG=true FLASK_APP=jobbedr flask run
+FLASK_DEBUG=true FLASK_APP="jobbedr:create_app()" flask run
 ```
 
 ```
