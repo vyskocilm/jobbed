@@ -16,6 +16,7 @@ from flask import url_for
 from flask import request
 
 from . import rq
+from . import make_jresponse
 
 scripts = Blueprint ("scripts", __name__)
 
@@ -132,7 +133,7 @@ def get_scripts ():
     return make_jresponse ([
         {
             "id" : name,
-            "api" : url_for ("post_scripts", name=name),
+            "api" : url_for (".post_scripts", name=name),
             "description": script["description"],
         }
         for name, script in SCRIPTS.items ()])
@@ -168,9 +169,40 @@ def post_scripts (name):
         code)
     """
 
-    import pdb; pdb.set_trace ()
-    cwd = scripts.config.get ("CWD")
-    job = do_jobbed_rq2.queue (cwd, resume_str, resume_str, SCRIPTS [name]["code"], queue='default', timeout=60)
+    from flask import current_app as app
+    cwd = app.config ["CWD"]
+    dq = rq.get_queue ("default")
+    job = do_jobbed_rq2.queue (cwd, resume_xml, resume_str, SCRIPTS [name]["code"], queue='default', timeout=60)
+
+    return make_jresponse ({
+        "api" : url_for (".get_job", job_id=job.id),
+        "id" : job.id,
+        "enqueued_at" : job.enqueued_at.isoformat(),
+        "status": job.status},
+        200)
+
+@scripts.route ("/api/v1/jobs/<job_id>", methods=["GET"])
+def get_job(job_id):
+    dq = rq.get_queue ("default")
+    job = dq.fetch_job (job_id)
+    if job is None:
+        return make_jresponse ({
+            "error": f"job id {job_id} not found"},
+            http.HTTPStatus.NOT_FOUND)
+
+    return make_jresponse ({
+        "api" : url_for (".get_job", job_id=job.id),
+        "id" : job.id,
+        "enqueued_at" : job.enqueued_at.isoformat(),
+        "status": job.status},
+        200)
+
+@scripts.route ("/api/v1/jobs/", methods=["GET"])
+def get_jobs ():
+    dq = rq.get_queue ("default")
+    return make_jresponse (
+        [url_for (".get_job", job_id=_id) for _id in dq.get_job_ids ()],
+        200)
 
 if __name__ == "__main__":
     app = create_app ()

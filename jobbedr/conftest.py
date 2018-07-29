@@ -24,7 +24,9 @@ def app ():
         ".redis",
     ))
 
-    _app = create_app ()
+    _app = create_app (
+        RQ_REDIS_URL="redis://127.0.0.1:5001/0"
+    )
     # TODO: use flask json client to enhance testing capabilities
     #from flask_jsontools import FlaskJsonClient
     #_app.test_client_class = FlaskJsonClient
@@ -32,8 +34,6 @@ def app ():
     # update configuration somehow
     #foo = os.environ.get ("JOBBEDR_FOO")
     #_app.config.update (dict (FOO=foo))
-    _app.config.update (dict (
-        RQ_REDIS_URL = "redis://127.0.0.1:5001/0"))
     yield _app
 
     redis_server.terminate ()
