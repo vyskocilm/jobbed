@@ -3,6 +3,7 @@ import http # and now we REQUIRE python3
 import subprocess #TODO only for subprocess module
 import multiprocessing
 from urllib.parse import urlparse
+import logging
 
 from flask import Flask
 from flask import make_response
@@ -11,6 +12,9 @@ from flask_rq2 import RQ
 
 from redis import StrictRedis
 from rq import push_connection, get_failed_queue
+from rq.handlers import move_to_failed_queue  # RQ's default exception handler
+
+from .foo import my_handler
 
 # global objects
 rq = RQ ()
@@ -23,13 +27,18 @@ def create_app (
     RQ_REDIS_URL="redis://localhost:6391/0",
     RQ_REDIS_WORKERS=None,
     WORKDIR=None,
-    DATADIR=None
+    DATADIR=None,
+    STATICDIR=None
     ):
 
-    app = Flask (__name__)
-
-    #FIXME: redis workers should get their own setup
+    #TODO: join STATICDIR with flask app
     cwd = os.getcwd ()
+    if STATICDIR is None:
+        STATICDIR = os.path.join (
+            cwd,
+            "jobbedr",
+            "static")
+    assert os.path.isdir (STATICDIR)
 
     if WORKDIR is None:
         WORKDIR = os.path.join (
@@ -43,12 +52,15 @@ def create_app (
             cwd,
             "..")
     assert os.path.isdir (DATADIR)
+    
+    app = Flask (__name__)
 
     # populate config for RQ2 queue
     app.config.update ((dict (
         RQ_REDIS_URL=RQ_REDIS_URL,
         WORKDIR=WORKDIR,
-        DATADIR=DATADIR
+        DATADIR=DATADIR,
+        STATICDIR=STATICDIR
     )))
 
     # init rq queue
@@ -60,6 +72,7 @@ def create_app (
     # initialize workers
     for i in range (RQ_REDIS_WORKERS):
         worker = rq.get_worker ('default')
+        worker.log.setLevel (logging.DEBUG)
         proc = multiprocessing.Process (target=worker.work, kwargs={'burst': False})
         rq_workers.append (proc)
         proc.start ()

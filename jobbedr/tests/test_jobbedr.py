@@ -18,7 +18,8 @@ def test_rq2 (app, client):
     assert job_js ["id"]
     assert job_js ["api"]
     assert job_js ["enqueued_at"]
-    assert job_js ["status"] == "queued"
+    assert job_js ["status"] == "queued" \
+        or job_js ["status"] == "finished"
     assert url_for ("scripts.get_job", job_id=job_js ["id"])
 
     response = client.get (url_for ("scripts.get_jobs"))

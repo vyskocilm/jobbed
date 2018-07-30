@@ -25,6 +25,10 @@ def app ():
         ".redis",
     ))
 
+    # this is MANDATORY for workers running under Flask - do not ask me why
+    os.environ ["FLASK_APP"]="jobbedr:create_app('redis://127.0.0.1:5001/0', 0)"
+    os.environ ["SERVER_NAME"]="localhost"
+
     _app = create_app (
         RQ_REDIS_URL="redis://127.0.0.1:5001/0",
         RQ_REDIS_WORKERS=1

@@ -35,13 +35,14 @@ def call_pdflatex (output_name, datadir=None):
     return output_name
 
 # main business logic code
-def do_jobbed (workdir, datadir, xml, resume_str, code):
+def do_jobbed (workdir, datadir, staticdir, xml, resume_str, code):
     #TODO: add an extra validation of loaded XML
     #TODO: this MUST be isolated from main server
     tempdir = tempfile.TemporaryDirectory (
         prefix="jobbed",
-        dir=os.path.join (cwd, "workdir"))
+        dir=workdir)
 
+    cwd = os.getcwd ()
     os.chdir (tempdir.name)
     
     # FIXME: ElementTree's API is AWFULL!! Can't believe this is the best
@@ -59,8 +60,7 @@ def do_jobbed (workdir, datadir, xml, resume_str, code):
     _uuid = str (uuid.uuid4 ())
     os.makedirs (
         os.path.join (
-            cwd,
-            "static",
+            staticdir,
             _uuid))
 
     if not isinstance (code, tuple):
@@ -72,21 +72,21 @@ def do_jobbed (workdir, datadir, xml, resume_str, code):
         out = f (datadir=datadir)
         shutil.copy2 (out,
             os.path.join (
-                cwd,
-                "static",
+                staticdir,
                 _uuid,
                 out))
-        outputs.append (
-            url_for ("static", filename=f"{_uuid}/{out}"))
+        outputs.append (f"{_uuid}/{out}")
 
     os.chdir (cwd)
-    workdir.cleanup ()
+    tempdir.cleanup ()
 
     return outputs, http.HTTPStatus.OK
 
 @rq.job
-def do_jobbed_rq2 (cwd, datadir, xml, resume_str, code):
-    return do_jobbed (cwd, xml, resume_str, code)
+def do_jobbed_rq2 (workdir, datadir, staticdir, xml, resume_str, code):
+    #from flask import current_app as app
+    #with app.app_context ():
+    return do_jobbed (workdir, datadir, staticdir, xml, resume_str, code)
 
 # FIXME: move out
 @scripts.route('/')
@@ -165,15 +165,24 @@ def post_scripts (name):
     from flask import current_app as app
     workdir = app.config ["WORKDIR"]
     datadir = app.config ["DATADIR"]
+    staticdir = app.config ["STATICDIR"]
     dq = rq.get_queue ("default")
     job = do_jobbed_rq2.queue (
         workdir,
         datadir,
+        staticdir,
         resume_xml,
         resume_str,
         SCRIPTS [name]["code"],
         queue="default",
-        timeout=60)
+        timeout=60,
+        ttl=500
+        )
+
+    #import pdb; pdb.set_trace ()
+    #fq = rq.get_failed_queue ()
+    #job1 = fq.jobs[0]
+    #print (job1.exc_info)
 
     return make_jresponse ({
         "api" : url_for (".get_job", job_id=job.id),
