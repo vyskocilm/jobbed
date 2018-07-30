@@ -22,27 +22,27 @@ scripts = Blueprint ("scripts", __name__)
 
 def call_gsl (script, output_name, datadir=None):
     assert datadir
-    subprocess.check_call (["gsl", f"-script:{datadir}/../{script}.gsl", "resume.xml"])
+    subprocess.check_call (["gsl", f"-script:{datadir}/{script}.gsl", "resume.xml"])
     assert os.path.exists (output_name)
     return output_name
 
 def call_pdflatex (output_name, datadir=None):
-    assert datadir
-    cmd = f"docker run -w /data -v {datadir}:/data -it --rm hiono/texlive pdflatex resume.tex"
+    cwd = os.getcwd ()
+    cmd = f"docker run -w /data -v {cwd}:/data -it --rm hiono/texlive pdflatex resume.tex"
     subprocess.check_call (
         shlex.split (cmd))
     assert os.path.exists (output_name)
     return output_name
 
 # main business logic code
-def do_jobbed (cwd, xml, resume_str, code):
+def do_jobbed (workdir, datadir, xml, resume_str, code):
     #TODO: add an extra validation of loaded XML
     #TODO: this MUST be isolated from main server
-    workdir = tempfile.TemporaryDirectory (
+    tempdir = tempfile.TemporaryDirectory (
         prefix="jobbed",
         dir=os.path.join (cwd, "workdir"))
 
-    os.chdir (workdir.name)
+    os.chdir (tempdir.name)
     
     # FIXME: ElementTree's API is AWFULL!! Can't believe this is the best
     # API for Python. How on earth can .parse return ElementTree, where
@@ -55,6 +55,7 @@ def do_jobbed (cwd, xml, resume_str, code):
     with open ("resume.xml", "wt") as resume_file:
         resume_file.write (resume_str)
 
+    #FIXME: redis job already have uuid - can't we just get it here?
     _uuid = str (uuid.uuid4 ())
     os.makedirs (
         os.path.join (
@@ -68,7 +69,7 @@ def do_jobbed (cwd, xml, resume_str, code):
     outputs = []
     #FIXME: error handling
     for f in code:
-        out = f (datadir=cwd)
+        out = f (datadir=datadir)
         shutil.copy2 (out,
             os.path.join (
                 cwd,
@@ -84,7 +85,7 @@ def do_jobbed (cwd, xml, resume_str, code):
     return outputs, http.HTTPStatus.OK
 
 @rq.job
-def do_jobbed_rq2 (cwd, xml, resume_str, code):
+def do_jobbed_rq2 (cwd, datadir, xml, resume_str, code):
     return do_jobbed (cwd, xml, resume_str, code)
 
 # FIXME: move out
@@ -161,18 +162,18 @@ def post_scripts (name):
     resume_xml = ET.fromstring (resume_str)
     assert resume_xml
 
-    """
-    # sync variant
-    js, code = do_jobbed (CWD, resume_xml, resume_str, SCRIPTS [name]["code"])
-    return make_jresponse (
-        js,
-        code)
-    """
-
     from flask import current_app as app
-    workdir = app.config ["CWD"]
+    workdir = app.config ["WORKDIR"]
+    datadir = app.config ["DATADIR"]
     dq = rq.get_queue ("default")
-    job = do_jobbed_rq2.queue (cwd, resume_xml, resume_str, SCRIPTS [name]["code"], queue="default", timeout=60)
+    job = do_jobbed_rq2.queue (
+        workdir,
+        datadir,
+        resume_xml,
+        resume_str,
+        SCRIPTS [name]["code"],
+        queue="default",
+        timeout=60)
 
     return make_jresponse ({
         "api" : url_for (".get_job", job_id=job.id),

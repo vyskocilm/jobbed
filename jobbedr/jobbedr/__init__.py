@@ -22,16 +22,33 @@ rq_workers = []
 def create_app (
     RQ_REDIS_URL="redis://localhost:6391/0",
     RQ_REDIS_WORKERS=None,
+    WORKDIR=None,
+    DATADIR=None
     ):
 
     app = Flask (__name__)
 
     #FIXME: redis workers should get their own setup
     cwd = os.getcwd ()
+
+    if WORKDIR is None:
+        WORKDIR = os.path.join (
+            cwd,
+            "jobbedr",
+            "workdir")
+    assert os.path.isdir (WORKDIR)
+
+    if DATADIR is None:
+        DATADIR = os.path.join (
+            cwd,
+            "..")
+    assert os.path.isdir (DATADIR)
+
     # populate config for RQ2 queue
     app.config.update ((dict (
         RQ_REDIS_URL=RQ_REDIS_URL,
-        CWD=cwd
+        WORKDIR=WORKDIR,
+        DATADIR=DATADIR
     )))
 
     # init rq queue
