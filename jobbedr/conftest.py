@@ -6,6 +6,7 @@ import itertools
 import os
 import time
 from jobbedr import create_app
+from jobbedr import rq_workers
 
 @pytest.fixture
 def app ():
@@ -25,7 +26,8 @@ def app ():
     ))
 
     _app = create_app (
-        RQ_REDIS_URL="redis://127.0.0.1:5001/0"
+        RQ_REDIS_URL="redis://127.0.0.1:5001/0",
+        RQ_REDIS_WORKERS=1
     )
     # TODO: use flask json client to enhance testing capabilities
     #from flask_jsontools import FlaskJsonClient
@@ -35,6 +37,9 @@ def app ():
     #foo = os.environ.get ("JOBBEDR_FOO")
     #_app.config.update (dict (FOO=foo))
     yield _app
+
+    for proc in rq_workers:
+        proc.terminate ()
 
     redis_server.terminate ()
     redis_server.wait (timeout=5)

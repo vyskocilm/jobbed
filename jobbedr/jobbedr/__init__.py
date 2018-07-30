@@ -1,5 +1,7 @@
 import os
 import http # and now we REQUIRE python3
+import subprocess #TODO only for subprocess module
+import multiprocessing
 
 from flask import Flask
 from flask import make_response
@@ -8,12 +10,14 @@ from flask_rq2 import RQ
 
 # global objects
 rq = RQ ()
+rq_workers = []
 
 # Flask application Factory
 # used to
 # 1. make application 
 def create_app (
     RQ_REDIS_URL="redis://localhost:6391/0",
+    RQ_REDIS_WORKERS=None
     ):
 
     app = Flask (__name__)
@@ -28,6 +32,22 @@ def create_app (
 
     # init rq queue
     rq.init_app (app)
+
+    if RQ_REDIS_WORKERS is None:
+        RQ_REDIS_WORKERS=int (subprocess.check_output ("nproc"))
+
+    # initialize workers
+    #import pdb; pdb.set_trace ()
+    for i in range (RQ_REDIS_WORKERS):
+        worker = rq.get_worker ('default')
+        proc = multiprocessing.Process (target=worker.work, kwargs={'burst': False})
+        rq_workers.append (proc)
+        proc.start ()
+
+    #
+    #rq_workers.extend (
+    #    rq.get_worker ('default').work (burst=False)
+    #    for i in range (RQ_REDIS_WORKERS))
 
     # load application blueprints
     from .scripts import scripts
