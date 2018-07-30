@@ -37,17 +37,11 @@ def create_app (
         RQ_REDIS_WORKERS=int (subprocess.check_output ("nproc"))
 
     # initialize workers
-    #import pdb; pdb.set_trace ()
     for i in range (RQ_REDIS_WORKERS):
         worker = rq.get_worker ('default')
         proc = multiprocessing.Process (target=worker.work, kwargs={'burst': False})
         rq_workers.append (proc)
         proc.start ()
-
-    #
-    #rq_workers.extend (
-    #    rq.get_worker ('default').work (burst=False)
-    #    for i in range (RQ_REDIS_WORKERS))
 
     # load application blueprints
     from .scripts import scripts
