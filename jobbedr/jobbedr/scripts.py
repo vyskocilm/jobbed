@@ -170,9 +170,9 @@ def post_scripts (name):
     """
 
     from flask import current_app as app
-    cwd = app.config ["CWD"]
+    workdir = app.config ["CWD"]
     dq = rq.get_queue ("default")
-    job = do_jobbed_rq2.queue (cwd, resume_xml, resume_str, SCRIPTS [name]["code"], queue='default', timeout=60)
+    job = do_jobbed_rq2.queue (cwd, resume_xml, resume_str, SCRIPTS [name]["code"], queue="default", timeout=60)
 
     return make_jresponse ({
         "api" : url_for (".get_job", job_id=job.id),

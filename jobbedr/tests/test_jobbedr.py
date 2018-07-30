@@ -6,7 +6,7 @@ def test_get_slash (client):
     assert response.status_code == 200
 
 def test_rq2 (app, client):
-    with open ('../examples/resume.xml', 'br') as fp:
+    with open ("../examples/resume.xml", "rt") as fp:
         data=fp.read ()
     response = client.post (
         url_for ("scripts.post_scripts", name="jobbed_html"),
