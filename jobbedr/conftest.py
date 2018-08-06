@@ -27,7 +27,7 @@ def app ():
 
     # this is MANDATORY for workers running under Flask - do not ask me why
     os.environ ["FLASK_APP"]="jobbedr:create_app('redis://127.0.0.1:5001/0', 0)"
-    os.environ ["SERVER_NAME"]="localhost"
+    #os.environ ["SERVER_NAME"]="localhost:5000"
 
     _app = create_app (
         RQ_REDIS_URL="redis://127.0.0.1:5001/0",
@@ -36,6 +36,9 @@ def app ():
     # TODO: use flask json client to enhance testing capabilities
     #from flask_jsontools import FlaskJsonClient
     #_app.test_client_class = FlaskJsonClient
+
+    # mandatory for url_for external=True
+    _app.config ["SERVER_NAME"]="localhost:5000"
     yield _app
 
     for proc in rq_workers:

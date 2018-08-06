@@ -29,7 +29,7 @@ def test_rq2 (app, client):
     jobs_js = response.get_json ()
     found=False
     for _, urls in jobs_js.items ():
-        if url_for ("scripts.get_job", job_id=job_js ["id"]) in urls:
+        if url_for ("scripts.get_job", job_id=job_js ["id"], _external=True) in urls:
             found = True
             break
     assert found

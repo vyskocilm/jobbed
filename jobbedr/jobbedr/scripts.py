@@ -138,7 +138,7 @@ def get_scripts ():
     return make_jresponse ([
         {
             "id" : name,
-            "api" : url_for (".post_scripts", name=name),
+            "api" : url_for (".post_scripts", name=name, _external=True),
             "description": script["description"],
         }
         for name, script in SCRIPTS.items ()])
@@ -185,7 +185,7 @@ def post_scripts (name):
         )
 
     return make_jresponse ({
-        "api" : url_for (".get_job", job_id=job.id),
+        "api" : url_for (".get_job", job_id=job.id, _external=True),
         "id" : job.id,
         "enqueued_at" : job.enqueued_at.isoformat(),
         "status": job.status},
@@ -202,14 +202,14 @@ def get_job(job_id):
             http.HTTPStatus.NOT_FOUND)
 
     base_response = {
-        "api" : url_for (".get_job", job_id=job.id),
+        "api" : url_for (".get_job", job_id=job.id, _external=True),
         "id" : job.id,
         "enqueued_at" : job.enqueued_at.isoformat(),
         "status": job.status}
 
     if job.status == "finished" and job.result is not None:
         base_response ["result"] = [
-            url_for ("static", filename=r) for r in job.result [0]]
+            url_for ("static", filename=r, _external=True) for r in job.result [0]]
 
     return make_jresponse (base_response, 200)
 
@@ -218,7 +218,7 @@ def get_jobs ():
     ret = {}
     dq = rq.get_queue ("default")
     ret ["default"] = \
-        [url_for (".get_job", job_id=_id) for _id in dq.get_job_ids ()]
+        [url_for (".get_job", job_id=_id, _external=True) for _id in dq.get_job_ids ()]
 
     # registries
     for key, JobRegistry in (
@@ -228,7 +228,7 @@ def get_jobs ():
         ):
         registry = JobRegistry (name="default", connection=rq.redis_connection)
         ret [key] = \
-            [url_for (".get_job", job_id=_id) for _id in registry.get_job_ids ()]
+            [url_for (".get_job", job_id=_id, _external=True) for _id in registry.get_job_ids ()]
     return make_jresponse (ret, 200)
 
 if __name__ == "__main__":
