@@ -92,19 +92,37 @@ output:
 POST /api/v1/scripts/<name>
 POST data: resume.xml
 output:
-[
-{"api" : "/api/v1/job/1", "status" : "in-progress"},
-{"api" : "/api/v1/job/2", "status" : "done"},
-]
+```
+{
+  'api': 'http://localhost:5000/api/v1/jobs/2ec241bc-160b-4e66-97c6-fae94c66efba',
+  'enqueued_at': '2018-08-06T11:18:59.260718',
+  'id': '2ec241bc-160b-4e66-97c6-fae94c66efba',
+  'status': 'queued'
+}
+```
+
+### List of all queued jobs
+GET /api/v1/jobs
+```
+{
+  'default': [],
+  'deffered': ['http://localhost:5000/api/v1/jobs/2ec241bc-160b-4e66-97c6-fae94c66efba'],
+  'finished': ['http://localhost:5000/api/v1/jobs/2ec241bc-160b-4e66-97c6-fae94c66efba'],
+  'started': []
+}
+```
 
 ### GET job details
-GET /api/v1/job/<id>
-{"api": "/api/v1/job/1",
- "status" : "done",
- "files" : [
-    {"api" : "/static/uuid", "content-type" : "text/plain", "size" : 1234},
- ]
+GET /api/v1/jobs/<id>
+```
+{
+  'api': 'http://localhost:5000/api/v1/jobs/2ec241bc-160b-4e66-97c6-fae94c66efba',
+  'enqueued_at': '2018-08-06T11:18:59.260718',
+  'id': '2ec241bc-160b-4e66-97c6-fae94c66efba',
+  'result': ['http://localhost:5000/static/2ec241bc-160b-4e66-97c6-fae94c66efba/resume.html'],
+  'status': 'finished'
 }
+```
 
 
 ## Use and manually test
