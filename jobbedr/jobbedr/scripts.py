@@ -3,7 +3,6 @@ import http # and now we REQUIRE python3
 import tempfile
 import os
 from functools import partial as FP
-import uuid
 import subprocess
 import shlex
 import shutil
@@ -39,7 +38,7 @@ def call_pdflatex (output_name, datadir=None):
     return output_name
 
 # main business logic code
-def do_jobbed (workdir, datadir, staticdir, xml, resume_str, code):
+def do_jobbed (workdir, datadir, staticdir, xml, resume_str, code, _uuid):
     #TODO: add an extra validation of loaded XML
     #TODO: this MUST be isolated from main server
     tempdir = tempfile.TemporaryDirectory (
@@ -60,8 +59,6 @@ def do_jobbed (workdir, datadir, staticdir, xml, resume_str, code):
     with open ("resume.xml", "wt") as resume_file:
         resume_file.write (resume_str)
 
-    #FIXME: redis job already have uuid - can't we just get it here?
-    _uuid = str (uuid.uuid4 ())
     os.makedirs (
         os.path.join (
             staticdir,
@@ -88,9 +85,9 @@ def do_jobbed (workdir, datadir, staticdir, xml, resume_str, code):
 
 @rq.job
 def do_jobbed_rq2 (workdir, datadir, staticdir, xml, resume_str, code):
-    #from flask import current_app as app
-    #with app.app_context ():
-    return do_jobbed (workdir, datadir, staticdir, xml, resume_str, code)
+    from rq import get_current_job
+    job = get_current_job ()
+    return do_jobbed (workdir, datadir, staticdir, xml, resume_str, code, _uuid=job.id)
 
 # FIXME: move out
 @scripts.route('/')

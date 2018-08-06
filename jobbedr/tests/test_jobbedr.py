@@ -38,3 +38,4 @@ def test_rq2 (app, client):
     assert response.status_code == 200
     job_js2 = response.get_json ()
     assert job_js2["result"]
+    assert all (job_js2["id"] in r for r in job_js2["result"])
