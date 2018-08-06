@@ -22,7 +22,19 @@ def test_rq2 (app, client):
         or job_js ["status"] == "finished"
     assert url_for ("scripts.get_job", job_id=job_js ["id"])
 
+    import time
+    time.sleep (0.5)
     response = client.get (url_for ("scripts.get_jobs"))
     assert response.status_code == 200
     jobs_js = response.get_json ()
-    assert url_for ("scripts.get_job", job_id=job_js ["id"]) in jobs_js
+    found=False
+    for _, urls in jobs_js.items ():
+        if url_for ("scripts.get_job", job_id=job_js ["id"]) in urls:
+            found = True
+            break
+    assert found
+    
+    response = client.get (url_for ("scripts.get_job", job_id=job_js ["id"]))
+    assert response.status_code == 200
+    job_js2 = response.get_json ()
+    assert job_js2["result"]

@@ -15,6 +15,10 @@ from flask import make_response
 from flask import url_for
 from flask import request
 
+from rq.registry import StartedJobRegistry
+from rq.registry import FinishedJobRegistry
+from rq.registry import DeferredJobRegistry
+
 from . import rq
 from . import make_jresponse
 
@@ -176,13 +180,9 @@ def post_scripts (name):
         SCRIPTS [name]["code"],
         queue="default",
         timeout=60,
-        ttl=500
+        ttl=500,
+        result_ttl=500
         )
-
-    #import pdb; pdb.set_trace ()
-    #fq = rq.get_failed_queue ()
-    #job1 = fq.jobs[0]
-    #print (job1.exc_info)
 
     return make_jresponse ({
         "api" : url_for (".get_job", job_id=job.id),
@@ -195,24 +195,41 @@ def post_scripts (name):
 def get_job(job_id):
     dq = rq.get_queue ("default")
     job = dq.fetch_job (job_id)
+
     if job is None:
         return make_jresponse ({
             "error": f"job id {job_id} not found"},
             http.HTTPStatus.NOT_FOUND)
 
-    return make_jresponse ({
+    base_response = {
         "api" : url_for (".get_job", job_id=job.id),
         "id" : job.id,
         "enqueued_at" : job.enqueued_at.isoformat(),
-        "status": job.status},
-        200)
+        "status": job.status}
+
+    if job.status == "finished" and job.result is not None:
+        base_response ["result"] = [
+            url_for ("static", filename=r) for r in job.result [0]]
+
+    return make_jresponse (base_response, 200)
 
 @scripts.route ("/api/v1/jobs/", methods=["GET"])
 def get_jobs ():
+    ret = {}
     dq = rq.get_queue ("default")
-    return make_jresponse (
-        [url_for (".get_job", job_id=_id) for _id in dq.get_job_ids ()],
-        200)
+    ret ["default"] = \
+        [url_for (".get_job", job_id=_id) for _id in dq.get_job_ids ()]
+
+    # registries
+    for key, JobRegistry in (
+        ("started", StartedJobRegistry),
+        ("finished", FinishedJobRegistry),
+        ("deffered", FinishedJobRegistry),
+        ):
+        registry = JobRegistry (name="default", connection=rq.redis_connection)
+        ret [key] = \
+            [url_for (".get_job", job_id=_id) for _id in registry.get_job_ids ()]
+    return make_jresponse (ret, 200)
 
 if __name__ == "__main__":
     app = create_app ()

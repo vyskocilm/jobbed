@@ -90,6 +90,7 @@ def create_app (
     push_connection(con)
 
     rq.get_failed_queue = lambda: get_failed_queue ()
+    rq.redis_connection = con
 
     # load application blueprints
     from .scripts import scripts
